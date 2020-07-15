@@ -228,7 +228,7 @@ m2 = gp.Model("assignment")
 # Since an assignment model always produces integer solutions, we use
 # continuous variables and solve as an LP.
 x = m2.addVars(availability2, vtype=GRB.BINARY, name="x")
-totRooms = m2.addVars(availability2, name='totRooms')
+totRooms = m2.addVars(availability2, lb = -100.0, name='totRooms')
 
 # The objective is to minimize the total weight costs
 m2.ModelSense = GRB.MINIMIZE
@@ -247,11 +247,11 @@ reqCts_3_n= m2.addConstrs((x.sum(t[0],t[1],c[0],c[1]) + x.sum('*',t[1],incl(c[0]
                       for t in Timeslot_Class
                       for c in Classroom))
 
-m2.addConstrs((totRooms[c] == x.sum(c[0], c[1], '*', '*') + x.sum('*', c[1], incl(c[2]), '*')
+m2.addConstrs((totRooms[c] == x.sum(c[0], c[1], '*', '*') - x.sum('*', c[1], c[2], '*')
                                    for c in availability2))
 
 
-m2.setObjectiveN(gp.quicksum(totRooms[c] for c in availability2), index=1, priority=3)
+m2.setObjectiveN(gp.quicksum(totRooms[c] for c in availability2), index=0, priority=3)
 
 
 # Using Python looping constructs, the preceding statement would be...
